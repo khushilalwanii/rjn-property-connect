@@ -25,6 +25,9 @@ export default function AddProperty() {
   const [identity, setIdentity] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<FileList | null>(null);
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -57,6 +60,13 @@ async function handleSubmit(e: React.FormEvent) {
   e.preventDefault();
   setLoading(true);
 
+  if (contactPhone.length !== 10) {
+    setPhoneError("Phone number must be exactly 10 digits");
+    setLoading(false);
+    return;
+  }
+
+
   try {
     // 🔐 STEP 1: Get logged-in user
     const {
@@ -88,6 +98,8 @@ async function handleSubmit(e: React.FormEvent) {
         identity,
         description,
         images: imageUrls,
+        contactName,
+        contactPhone,
         userId: user.id, // 👈 THIS IS THE KEY LINE
       }),
     });
@@ -131,6 +143,62 @@ async function handleSubmit(e: React.FormEvent) {
         </select>
 
         <textarea className="w-full border p-3 rounded" rows={4} placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Contact Name
+          </label>
+          <input
+            type="text"
+            value={contactName}
+            onChange={(e) => setContactName(e.target.value)}
+            required
+            className="
+              w-full px-4 py-3 rounded-lg
+              border border-[var(--card-border)]
+              bg-transparent
+            "
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Contact Phone Number
+          </label>
+
+          <input
+            type="tel"
+            value={contactPhone}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              // allow only digits
+              if (/^\d*$/.test(value)) {
+                setContactPhone(value);
+
+                if (value.length !== 10) {
+                  setPhoneError("Phone number must be exactly 10 digits");
+                } else {
+                  setPhoneError("");
+                }
+              }
+            }}
+            placeholder="10-digit mobile number"
+            maxLength={10}
+            required
+            className="
+              w-full px-4 py-3 rounded-lg
+              border border-[var(--card-border)]
+              bg-transparent
+            "
+          />
+
+          {phoneError && (
+            <p className="mt-1 text-sm text-red-500">
+              {phoneError}
+            </p>
+          )}
+        </div>
 
         <input
           type="file"

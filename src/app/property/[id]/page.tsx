@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 
 type Property = {
   id: string;
+  propertyCode: string;
   title: string;
   price: string;
   location: string;
@@ -133,21 +134,61 @@ export default function PropertyDetails() {
     </div>
   )}
 
+  <p className="text-xs text-[var(--text-secondary)] mb-2">
+    Property ID: {property.propertyCode}
+  </p>
 
-      <div className="mt-8 border rounded-lg p-4 bg-gray-50">
-        <p className="text-sm">
-          <strong>Purpose:</strong>{" "}
-          {property.purpose}
-        </p>
-        <p className="text-sm mt-1">
-          <strong>Listed by:</strong>{" "}
-          {property.identity}
-        </p>
-        <p className="text-sm mt-1">
-          <strong>Status:</strong>{" "}
-          {property.verified ? "Verified" : "Pending"}
-        </p>
-      </div>
+  <div
+    className="
+      mt-8 rounded-lg p-5
+      bg-[var(--card-bg)]
+      border border-[var(--card-border)]
+      text-[var(--text-primary)]
+    "
+  >
+    <p className="text-sm">
+      <span className="font-semibold">Purpose:</span>{" "}
+      <span className="text-[var(--text-secondary)]">
+        {property.purpose}
+      </span>
+    </p>
+
+    <p className="text-sm mt-2">
+      <span className="font-semibold">Listed by:</span>{" "}
+      <span className="text-[var(--text-secondary)]">
+        {property.identity}
+      </span>
+    </p>
+
+    <p className="text-sm mt-2">
+      <span className="font-semibold">Status:</span>{" "}
+      <span
+        className={
+          property.verified
+            ? "text-emerald-600 dark:text-emerald-400 font-medium"
+            : "text-amber-600 dark:text-amber-400 font-medium"
+        }
+      >
+        {property.verified ? "Verified" : "Pending"}
+      </span>
+    </p>
+  </div>
+
+  {!property.verified && (
+  <div
+    className="
+      mt-6 p-4 rounded-lg
+      bg-amber-50 text-amber-700
+      dark:bg-amber-900/30 dark:text-amber-300
+      text-sm
+    "
+  >
+    ⚠ This property is pending verification. Please verify details
+    independently before making any payments.
+  </div>
+)}
+
+
 
       <p className="mt-6 text-xs text-gray-500">
         All properties are reviewed and verified offline.
