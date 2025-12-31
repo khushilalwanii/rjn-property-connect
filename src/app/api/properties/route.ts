@@ -8,9 +8,10 @@ async function generatePropertyCode(purpose: string) {
     where: { purpose },
   });
 
-  const nextNumber = String(count + 1).padStart(4, "0");
+  const randomSuffix = Math.floor(Math.random() * 1000);
+  const number = count + 1 + randomSuffix;
 
-  return `${prefix}-RJN-${nextNumber}`;
+  return `${prefix}-RJN-${String(number).padStart(4, "0")}`;
 }
 
 
@@ -59,24 +60,44 @@ export async function POST(req: Request) {
       );
     }
 
-    const propertyCode = await generatePropertyCode(purpose);
+    let property;
+    let attempts = 0;
 
-    const property = await prisma.property.create({
-      data: {
-        propertyCode,
-        title,
-        price,
-        location,
-        purpose,
-        identity,
-        description,
-        images,
-        contactName,
-        contactPhone,
-        userId,
-        verified: false,
-      },
-    });
+    while (!property && attempts < 2) {
+      try {
+        const propertyCode = await generatePropertyCode(purpose);
+
+        property = await prisma.property.create({
+          data: {
+            propertyCode,
+            title,
+            price,
+            location,
+            purpose,
+            identity,
+            description,
+            images,
+            contactName,
+            contactPhone,
+            userId,
+            verified: false,
+          },
+        });
+      } catch (error: any) {
+        if (error.code !== "P2002") {
+          throw error;
+        }
+        attempts++;
+      }
+    }
+
+    if (!property) {
+      return NextResponse.json(
+        { error: "Failed to generate unique property ID" },
+        { status: 500 }
+      );
+    }
+
 
     if (!/^\d{10}$/.test(contactPhone)) {
       return NextResponse.json(
