@@ -18,8 +18,7 @@ export async function POST(req: Request) {
 
     if (!existingUser) {
       await prisma.user.create({
-        data: {
-          id,
+        data: { 
           email,
           name,
         },
