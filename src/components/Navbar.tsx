@@ -115,7 +115,13 @@ export default function Navbar() {
           ) : (
             <button
               onClick={() =>
-                supabase.auth.signInWithOAuth({ provider: "google" })
+                supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                  },
+                })
+
               }
               className="px-4 py-2 bg-black text-white rounded text-sm"
             >
