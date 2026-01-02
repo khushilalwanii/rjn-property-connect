@@ -92,7 +92,7 @@ async function handleSubmit(e: React.FormEvent) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title,
-        price,
+        price: Number(price),
         location,
         purpose,
         identity,
@@ -100,7 +100,7 @@ async function handleSubmit(e: React.FormEvent) {
         images: imageUrls,
         contactName,
         contactPhone,
-        userId: user.id, // 👈 THIS IS THE KEY LINE
+        userEmail: user.email,
       }),
     });
 

@@ -7,7 +7,7 @@ type Property = {
   id: string;
   propertyCode: string;
   title: string;
-  price: string;
+  price: number;
   location: string;
   purpose: string;
   identity: string;

@@ -3,7 +3,7 @@ CREATE TABLE "Property" (
     "id" TEXT NOT NULL,
     "propertyCode" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "price" TEXT NOT NULL,
+    "price" INTEGER NOT NULL,
     "location" TEXT NOT NULL,
     "purpose" TEXT NOT NULL DEFAULT 'SELL',
     "identity" TEXT NOT NULL,
@@ -36,3 +36,6 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "Property" ADD CONSTRAINT "Property_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "Property"
+ALTER COLUMN "price" TYPE INTEGER USING ("price"::integer);

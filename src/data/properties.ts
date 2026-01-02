@@ -1,7 +1,7 @@
 export type Property = {
   id: string;
   title: string;
-  price: string;
+  price: number;
   location: string;
   identity: string;
   verified: boolean;
@@ -13,7 +13,7 @@ export const properties: Property[] = [
   {
     id: "R001",
     title: "2 BHK Independent House",
-    price: "₹45 Lakhs",
+    price: 978675,
     location: "Rajnandgaon",
     identity: "Owner",
     verified: true,
@@ -23,7 +23,7 @@ export const properties: Property[] = [
   {
     id: "R002",
     title: "Commercial Plot",
-    price: "₹1.2 Crore",
+    price: 4599090,
     location: "Rajnandgaon",
     identity: "Broker",
     verified: false,

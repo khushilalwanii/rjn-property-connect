@@ -1,47 +1,47 @@
+import { generatePropertyCode } from "@/lib/generatePropertyCode";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 
-async function generatePropertyCode(purpose: string) {
-  const prefix = purpose === "RENT" ? "R" : "S";
+// ✅ Validate incoming data
+const schema = z.object({
+  title: z.string().min(3),
+  price: z.number(),
+  location: z.string(),
+  purpose: z.string(),
+  identity: z.string(),
+  description: z.string(),
+  images: z.array(z.string()),
+  contactName: z.string(),
+  contactPhone: z.string(),
+  userEmail: z.string().email(), // ✅ THIS WAS MISSING
+});
 
-  const count = await prisma.property.count({
-    where: { purpose },
-  });
-
-  const randomSuffix = Math.floor(Math.random() * 1000);
-  const number = count + 1 + randomSuffix;
-
-  return `${prefix}-RJN-${String(number).padStart(4, "0")}`;
-}
-
-
-/* GET: Fetch all properties */
 export async function GET() {
   try {
     const properties = await prisma.property.findMany({
-      orderBy: [
-        { verified: "desc" },   // ✅ verified first
-        { createdAt: "desc" },  // newest within group
-      ],
+      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(properties);
+    return NextResponse.json(properties, { status: 200 });
   } catch (error) {
+    console.error("GET PROPERTIES ERROR:", error);
+
+    // Always return JSON
     return NextResponse.json(
-      { error: "Failed to fetch properties" },
+      { error: "Failed to load properties" },
       { status: 500 }
     );
   }
 }
 
-/* POST: Add new property */
+
 export async function POST(req: Request) {
   try {
+    // ✅ STEP 1: read & validate body
     const body = await req.json();
-
     const {
       title,
-      price,
       location,
       purpose,
       identity,
@@ -49,18 +49,26 @@ export async function POST(req: Request) {
       images,
       contactName,
       contactPhone,
-      userId,
-    } = body;
+      userEmail, // ✅ NOW DEFINED
+    } = schema.parse(body);
 
-    
-    if (!userId) {
+    const { price } = schema.parse(body);
+
+
+    // ✅ STEP 2: fetch Prisma user
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (!user) {
       return NextResponse.json(
-        { error: "Missing userId" },
-        { status: 400 }
+        { error: "User not found" },
+        { status: 401 }
       );
     }
 
-    let property;
+    // ✅ STEP 3: create property (retry for unique code)
+    let property = null;
     let attempts = 0;
 
     while (!property && attempts < 2) {
@@ -79,41 +87,34 @@ export async function POST(req: Request) {
             images,
             contactName,
             contactPhone,
-            userId,
+            userId: user.id, // ✅ FK satisfied
             verified: false,
           },
         });
-      } catch (error: any) {
-        if (error.code !== "P2002") {
-          throw error;
-        }
+      } catch (err) {
         attempts++;
       }
     }
 
     if (!property) {
       return NextResponse.json(
-        { error: "Failed to generate unique property ID" },
+        { error: "Failed to generate unique property code" },
         { status: 500 }
       );
     }
 
-
-    if (!/^\d{10}$/.test(contactPhone)) {
+    return NextResponse.json(property, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid phone number" },
+        { error: error.flatten() },
         { status: 400 }
       );
     }
 
-
-    return NextResponse.json(property, {
-      status: 201,
-    });
-  } catch (error) {
     console.error("PROPERTY CREATE ERROR:", error);
     return NextResponse.json(
-      { error: "Failed to create property" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

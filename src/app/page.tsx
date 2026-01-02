@@ -7,7 +7,7 @@ type Property = {
   id: string;
   propertyCode: string;
   title: string;
-  price: string;
+  price: Number;
   location: string;
   purpose: string;
   identity: string;
@@ -23,8 +23,14 @@ export default function Home() {
   useEffect(() => {
     async function loadProperties() {
       try {
-        const res = await fetch("/api/properties", { cache: "no-store" });
-        const data: Property[] = await res.json();
+      const res = await fetch("/api/properties", { cache: "no-store" });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch properties");
+      }
+
+      const data: Property[] = await res.json();
+
         setProperties(data);
       } catch (error) {
         console.error("Failed to load properties", error);
@@ -132,7 +138,7 @@ export default function Home() {
 
                 {/* PRICE */}
                 <p className="mt-auto text-xl font-bold text-[var(--accent)]">
-                  {property.price}
+                  ₹{property.price.toLocaleString("en-IN")}
                 </p>
 
                 {/* VERIFIED */}

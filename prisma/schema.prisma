@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Property {
-  id          String   @id @default(uuid())
+  id          String   @id @default(cuid())
   propertyCode  String   @unique
   title       String
-  price       String
+  price       Int
   location    String
   purpose     String   @default("SELL")
   identity    String
